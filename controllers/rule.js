@@ -32,27 +32,29 @@ exports.deleteRule = (req, res, next) => {
 };
 //qury lsat entey from db
 exports.evalRule = (req, res, next) => {
-  const triCondition = documents.indexOf('and') ? 'and' : null;
-  const isBinary = documents.indexOf('or') ? 'or' : triCondition;
-  const splitOpt = isBinary ? null : 0;
-  let typeLastRecorededValue;
-  let result = false;
-  const formulas = documnets.split(isBinary, splitOpt).map(formulaFrame => {
-    const type = documnets
-      .split('{')
-      .pop()
-      .split('}')[0];
-    const operator = documnets.split('}')[0];
-    const value = documnets.split(' ')[2];
-    db.inventory.find({ sampleType: type }).then(documnets => {
-      typeLastRecorededValue = documnets.value;
+  db.inventory.find({ _id: req.params.id }).then(documnets => {
+    const triCondition = documents.indexOf('and') ? 'and' : null;
+    const isBinary = documents.indexOf('or') ? 'or' : triCondition;
+    const splitOpt = isBinary ? null : 0;
+    let typeLastRecorededValue;
+    let result = false;
+    const formulas = documnets.split(isBinary, splitOpt).map(formulaFrame => {
+      const type = documnets
+        .split('{')
+        .pop()
+        .split('}')[0];
+      const operator = documnets.split('}')[0];
+      const value = documnets.split(' ')[2];
+      db.inventory.find({ sampleType: type }).then(documnets => {
+        typeLastRecorededValue = documnets.value;
+      });
+      result =
+        operator === '<'
+          ? typeLastRecorededValue < value
+          : operator === '>'
+          ? typeLastRecorededValue > value
+          : typeLastRecorededValue === value;
     });
-    result =
-      operator === '<'
-        ? typeLastRecorededValue < value
-        : operator === '>'
-        ? typeLastRecorededValue > value
-        : typeLastRecorededValue === value;
+    return result;
   });
-  return result;
 };
