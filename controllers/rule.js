@@ -54,4 +54,5 @@ exports.evalRule = (req, res, next) => {
         ? typeLastRecorededValue > value
         : typeLastRecorededValue === value;
   });
+  return result;
 };

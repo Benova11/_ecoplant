@@ -3,14 +3,14 @@ const router = express.Router();
 
 const ruleController = require('../controllers/rule');
 
-router.get('/rule/:id', ruleController.getRule);
+router.get('/:id', ruleController.getRule);
 
-router.post('/rule', ruleController.createRule);
+router.post('', ruleController.createRule);
 
-router.put('/rule/:id', ruleController.updateRule);
+router.put('/:id', ruleController.updateRule);
 
-router.delete('/rule/:id', ruleController.deleteRule);
+router.delete('/:id', ruleController.deleteRule);
 
-router.get('/rule/:id/eval', ruleController.evalRule);
+router.get('/:id/eval', ruleController.evalRule);
 
 module.exports = router;
