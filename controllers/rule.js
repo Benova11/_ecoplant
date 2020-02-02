@@ -36,25 +36,29 @@ exports.evalRule = (req, res, next) => {
     const triCondition = documents.indexOf('and') ? 'and' : null;
     const isBinary = documents.indexOf('or') ? 'or' : triCondition;
     const splitOpt = isBinary ? null : 0;
-    let typeLastRecorededValue;
-    let result = false;
-    const formulas = documnets.split(isBinary, splitOpt).map(formulaFrame => {
-      const type = documnets
-        .split('{')
-        .pop()
-        .split('}')[0];
-      const operator = documnets.split('}')[0];
-      const value = documnets.split(' ')[2];
-      db.inventory.find({ sampleType: type }).then(documnets => {
-        typeLastRecorededValue = documnets.value;
-      });
-      result =
-        operator === '<'
-          ? typeLastRecorededValue < value
-          : operator === '>'
-          ? typeLastRecorededValue > value
-          : typeLastRecorededValue === value;
-    });
-    return result;
+    return eval(splitOpt);
   });
+};
+
+const eval = splitOpt => {
+  let typeLastRecorededValue;
+  let result = false;
+  documnets.split(isBinary, splitOpt).map(formulaFrame => {
+    const type = documnets
+      .split('{')
+      .pop()
+      .split('}')[0];
+    const operator = documnets.split('}')[0];
+    const value = documnets.split(' ')[2];
+    db.inventory.find({ sampleType: type }).then(documnets => {
+      typeLastRecorededValue = documnets.value;
+    });
+    result =
+      operator === '<'
+        ? typeLastRecorededValue < value
+        : operator === '>'
+        ? typeLastRecorededValue > value
+        : typeLastRecorededValue === value;
+  });
+  return result;
 };
