@@ -1,7 +1,7 @@
 const express = require('express');
-const router = express.Router();
-
 const ruleController = require('../controllers/rule');
+
+const router = express.Router();
 
 router.get('/:id', ruleController.getRule);
 

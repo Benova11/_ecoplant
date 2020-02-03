@@ -1,14 +1,14 @@
 const express = require('express');
-const router = express.Router();
-
 const dataSampleController = require('../controllers/data-sample');
 
-router.get('/data-sample/:id', dataSampleController.getSample);
+const router = express.Router();
 
-router.post('/data-sample', dataSampleController.createSample);
+router.get('/:id', dataSampleController.getSample);
 
-router.put('/data-sample/:id', dataSampleController.updateSample);
+router.post('', dataSampleController.createSample);
 
-router.delete('/data-sample/:id', dataSampleController.deleteSample);
+router.put('/:id', dataSampleController.updateSample);
+
+router.delete('/:id', dataSampleController.deleteSample);
 
 module.exports = router;

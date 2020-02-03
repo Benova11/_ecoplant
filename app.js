@@ -9,16 +9,7 @@ const db = require('./data/db');
 const app = express();
 
 app.use(bodyParser.json());
-
-db.connect(err => {
-  if (err) {
-    console.log('unable to connect to database');
-    return;
-  }
-  app.listen(3000, () => {
-    console.log('connect to database, app listening on port 3000');
-  });
-});
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -30,9 +21,15 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
 app.use('/data-sample', dataSampleRoutes);
 app.use('/rule', ruleRoutes);
+
+db.connect(err => {
+  if (err) {
+    console.log('unable to connect to database');
+  } else {
+    app.listen(3000, () => {
+      console.log('connect to database, app listening on port 3000');
+    });
+  }
+});

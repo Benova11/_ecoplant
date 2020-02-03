@@ -1,72 +1,101 @@
-const collection = 'rule_collection';
+const db = require('../data/db');
 
 exports.createRule = (req, res, next) => {
-  const rule = req.body.rule;
+  const rule = { formula: req.body.rule };
   db.getDB()
-    .collection(collection)
-    .insertOne(rule, (err, docs) => {
+    .collection('rule_collection')
+    .insertOne(rule, (err, result) => {
       if (err) {
         console.log('couldnt create rule');
-        return;
+      } else {
+        res.json(result + 'CREATED');
       }
-      res.json(rule + 'CREATED');
     });
 };
 
 exports.getRule = (req, res, next) => {
-  db.inventory.find({ _id: req.params.id }, (err, docs) => {
-    if (err) {
-      console.log('cant find rule');
-      return;
-    }
-    res.json(docs);
-  });
+  db.getDB()
+    .collection('rule_collection')
+    .find(
+      { _id: db.getPrimaryKey(req.params.id) },
+      { projection: { _id: 0, formula: 1 } }
+    )
+    .toArray((err, rule) => {
+      if (err) {
+        console.log('cant find rule');
+      } else {
+        res.json(rule);
+      }
+    });
 };
 
 exports.updateRule = (req, res, next) => {
   const rule = req.body.rule;
   db.getDB()
-    .collection(collection)
-    .updateOne({ _id: req.params.id }, rule, (err, docs) => {
-      if (err) {
-        console.log('couldnt update rule');
-        return;
+    .collection('rule_collection')
+    .updateOne(
+      { _id: db.getPrimaryKey(req.params.id) },
+      rule,
+      (err, result) => {
+        if (err) {
+          console.log('couldnt update rule');
+        } else {
+          res.send(result + 'UPDATED');
+        }
       }
-    });
-  res.send(rule + 'UPDATED');
+    );
 };
 
 exports.deleteRule = (req, res, next) => {
-  db.inventory.deleteOne({ _id: req.params.id }, (err, docs) => {
-    if (err) {
-      console.log('couldnt remove rule');
-      return;
-    }
-  });
-  res.send('DELETED');
+  db.getDB()
+    .collection('rule_collection')
+    .deleteOne({ _id: db.getPrimaryKey(req.params.id) }, (err, result) => {
+      if (err) {
+        console.log('couldnt remove rule');
+      } else {
+        res.send(result + 'DELETED');
+      }
+    });
 };
 
 exports.checkRule = (req, res, next) => {
-  db.inventory.find({ _id: req.params.id }).then(documents => {
-    const triCondition = documents.indexOf('and') ? 'and' : null;
-    const isBinary = documents.indexOf('or') ? 'or' : triCondition;
-    const splitOpt = isBinary ? null : 0;
-    return evaluate(documents, splitOpt);
-  });
+  const id = db.getPrimaryKey(req.params.id);
+  db.getDB()
+    .collection('rule_collection')
+    .find({ _id: id }, { projection: { _id: 0, formula: 1 } })
+    .toArray((err, rule) => {
+      if (err) {
+        console.log('couldnt find rule');
+      } else {
+        const triCondition = rule[0].formula.includes('and') ? 'and' : null;
+        const isBinary = rule[0].formula.includes('or') ? 'or' : triCondition;
+        adjustedRule = isBinary ? rule[0].formula.replace(isBinary, '#') : rule;
+
+        return evaluate(adjustedRule, id);
+      }
+    });
 };
 
-const evaluate = (documents, splitOpt) => {
+const evaluate = (rule, id) => {
   let result = false;
-  documents.split(isBinary, splitOpt).map(formulaFrame => {
-    let ruleToEval = documents.split(' ');
-    const type = documents
+  rule.split('#').map(ruleFrame => {
+    let ruleToEval = ruleFrame.split(' ');
+    const type = ruleFrame
       .split('{')
       .pop()
       .split('}')[0];
     ruleToEval[0] = type;
-    db.inventory.find({ sampleType: type }).then(documents => {
-      ruleToEval[0] = documents.value;
-    });
+    db.getDB()
+      .collection('ds_collection')
+      .find({ _id: id })
+      .toArray((err, sample) => {
+        if (err) {
+          console.log('couldnt find sample');
+        } else {
+          console.log(sample.value);
+          ruleToEval[0] = sample.value;
+        }
+      });
     result = eval(ruleToEval.toString().replace(/,/g, ' '));
   });
   return result;
