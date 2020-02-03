@@ -1,3 +1,5 @@
+const collection = 'ds_collection';
+
 exports.createSample = (req, res, next) => {
   const dataSmple = {
     timeStamp: Date.now(),
@@ -5,13 +7,24 @@ exports.createSample = (req, res, next) => {
     value: req.body.value
   };
   db.getDB()
-    .collection(ds_collection)
-    .insertOne(dataSmple);
+    .collection(collection)
+    .insertOne(dataSmple, (err, docs) => {
+      if (err) {
+        console.log('couldnt create');
+        return;
+      }
+    });
   res.json(dataSmple + 'CREATED');
 };
 
 exports.getSample = (req, res, next) => {
-  res.send(db.inventory.find({ timeStamp: req.params.id }));
+  db.collection(collection).find({ _id: req.params.id }, (err, docs) => {
+    if (err) {
+      console.log('cant find ds');
+      return;
+    }
+    res.json(docs);
+  });
 };
 
 exports.updateSample = (req, res, next) => {
@@ -21,12 +34,20 @@ exports.updateSample = (req, res, next) => {
     value: req.body.value
   };
   db.getDB()
-    .collection(ds_collection)
-    .updateOne({ _id: req.params.id }, dataSmple);
+    .collection(collection)
+    .updateOne({ _id: req.params.id }, dataSmple, (err, dcos) => {
+      if (err) {
+        console.log('couldnt update ds');
+      }
+    });
   res.send(dataSmple + 'UPDATED');
 };
 
 exports.deleteSample = (req, res, next) => {
-  db.inventory.deleteOne({ _id: req.params.id });
+  db.inventory.deleteOne({ _id: req.params.id }, () => {
+    if (err) {
+      console.log('couldnt remove ds');
+    }
+  });
   res.send('DELETED');
 };
