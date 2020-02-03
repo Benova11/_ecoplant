@@ -87,7 +87,7 @@ const evaluate = (rule, id) => {
     ruleToEval[0] = type;
     db.getDB()
       .collection('ds_collection')
-      .find({ _id: id })
+      .find({ sampleType: ruleToEval[0] })
       .toArray((err, sample) => {
         if (err) {
           console.log('couldnt find sample');
