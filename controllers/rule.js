@@ -32,26 +32,27 @@ exports.deleteRule = (req, res, next) => {
 };
 //qury lsat entey from db
 exports.evalRule = (req, res, next) => {
-  db.inventory.find({ _id: req.params.id }).then(documnets => {
+  db.inventory.find({ _id: req.params.id }).then(documents => {
     const triCondition = documents.indexOf('and') ? 'and' : null;
     const isBinary = documents.indexOf('or') ? 'or' : triCondition;
     const splitOpt = isBinary ? null : 0;
-    return eval(splitOpt);
+    return evaluate(documents, splitOpt);
   });
 };
 
-const eval = splitOpt => {
+const evaluate = (documents, splitOpt) => {
   let typeLastRecorededValue;
   let result = false;
-  documnets.split(isBinary, splitOpt).map(formulaFrame => {
-    const type = documnets
+  documents.split(isBinary, splitOpt).map(formulaFrame => {
+    const type = documents
       .split('{')
       .pop()
       .split('}')[0];
-    const operator = documnets.split('}')[0];
-    const value = documnets.split(' ')[2];
-    db.inventory.find({ sampleType: type }).then(documnets => {
-      typeLastRecorededValue = documnets.value;
+
+    const operator = documents.split('}')[0];
+    const value = documents.split(' ')[2];
+    db.inventory.find({ sampleType: type }).then(documents => {
+      typeLastRecorededValue = documents.value;
     });
     result =
       operator === '<'
