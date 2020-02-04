@@ -75,14 +75,28 @@ exports.checkRule = (req, res, next) => {
         }
         const triCondition = rule.formula.includes('and') ? 'and' : null;
         const isBinary = rule.formula.includes('or') ? 'or' : triCondition;
-        adjustedRule = isBinary ? rule.formula.replace(isBinary, '#') : rule;
-        res.json(evaluate(adjustedRule));
+        adjustedRule = isBinary
+          ? rule.formula.split(' ' + isBinary + ' ')
+          : rule;
+        evaluate(adjustedRule, isBinary, res);
       }
     );
 };
 
-const evaluate = rule => {
-  rule.split(' # ').map(ruleFrame => {
+const evaluate = (rule, isBinary, res) => {
+  /*
+  if (rule.length === 2) {
+    switch (isBinary) {
+      case 'or':
+        return;
+
+      case 'and':
+        return;
+    }
+  }
+  */
+  console.log(rule);
+  rule.map(ruleFrame => {
     let ruleToEval = ruleFrame.split(' ');
     const type = ruleFrame
       .split('{')
