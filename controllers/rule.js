@@ -87,36 +87,37 @@ const evaluate = (rule, isBinary) => {
   let queryObj = {};
   let queryOperator;
   if (rulesArr.constructor === Array) {
+    console.log(adjustOperatorToQuery(rulesArr[0]));
+    console.log(adjustOperatorToQuery(rulesArr[1]));
     let triQuery = [
-      { sampleType: rulesArr[0].type },
-      { sampleType: rulesArr[1].type }
+      {
+        sampleType: rulesArr[0].type,
+        value: adjustOperatorToQuery(rulesArr[0])
+      },
+      {
+        sampleType: rulesArr[1].type,
+        value: adjustOperatorToQuery(rulesArr[1])
+      }
     ];
     switch (isBinary) {
       case 'or': {
-        rulesArr.map(rule => {
-          triQuery['value'] = adjustOperatorToQuery(rule);
-        });
         queryObj = {
           $or: triQuery
         };
         break;
       }
       case 'and': {
-        rulesArr.map(rule => {
-          triQuery['value'] = adjustOperatorToQuery(rule);
-        });
         queryObj = {
-          $or: triQuery
+          $and: triQuery
         };
         break;
       }
     }
   } else {
     queryOperator = adjustOperatorToQuery(rulesArr);
-    queryObj = { sampleType: rule.type, value: queryOperator };
+    queryObj = { sampleType: rulesArr.type, value: queryOperator };
+    console.log(queryObj);
   }
-
-  console.log(queryObj);
 
   db.getDB()
     .collection('ds_collection')
@@ -125,7 +126,7 @@ const evaluate = (rule, isBinary) => {
       if (err) {
         console.log('couldnt find sample');
       }
-      console.log(sample);
+      console.log(sample[0] !== undefined);
     });
 };
 
