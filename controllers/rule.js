@@ -1,6 +1,5 @@
 const db = require('../data/db');
 const collection = 'rule_collection';
-const evaluation = { results: [] };
 
 exports.createRule = (req, res, next) => {
   const rule = { formula: req.body.rule };
@@ -77,52 +76,102 @@ exports.checkRule = (req, res, next) => {
         const isBinary = rule.formula.includes('or') ? 'or' : triCondition;
         adjustedRule = isBinary
           ? rule.formula.split(' ' + isBinary + ' ')
-          : rule;
-        evaluate(adjustedRule, isBinary, res);
+          : rule.formula;
+        evaluate(adjustedRule, isBinary);
       }
     );
 };
 
-const evaluate = (rule, isBinary, res) => {
-  /*
-  if (rule.length === 2) {
+const evaluate = (rule, isBinary) => {
+  const rulesArr = getObjArr(rule);
+  let queryObj = {};
+  let queryOperator;
+  if (rulesArr.constructor === Array) {
+    let triQuery = [
+      { sampleType: rulesArr[0].type },
+      { sampleType: rulesArr[1].type }
+    ];
     switch (isBinary) {
-      case 'or':
-        return;
+      case 'or': {
+        rulesArr.map(rule => {
+          triQuery['value'] = adjustOperatorToQuery(rule);
+        });
+        queryObj = {
+          $or: triQuery
+        };
+        break;
+      }
+      case 'and': {
+        rulesArr.map(rule => {
+          triQuery['value'] = adjustOperatorToQuery(rule);
+        });
+        queryObj = {
+          $or: triQuery
+        };
+        break;
+      }
+    }
+  } else {
+    queryOperator = adjustOperatorToQuery(rulesArr);
+    queryObj = { sampleType: rule.type, value: queryOperator };
+  }
 
-      case 'and':
-        return;
+  console.log(queryObj);
+
+  db.getDB()
+    .collection('ds_collection')
+    .find(queryObj)
+    .toArray((err, sample) => {
+      if (err) {
+        console.log('couldnt find sample');
+      }
+      console.log(sample);
+    });
+};
+
+const getObjArr = rule => {
+  let objArr;
+  if (rule.constructor === Array) {
+    objArr = rule.map(ruleFrame => {
+      let ruleToEval = extractType(ruleFrame);
+      let ruleToEvalObj = createObject(ruleToEval);
+      return ruleToEvalObj;
+    });
+  } else {
+    let ruleToEval = extractType(rule);
+    objArr = createObject(ruleToEval);
+  }
+  return objArr;
+};
+
+const extractType = rule => {
+  let extracted = rule.split(' ');
+  const type = rule
+    .split('{')
+    .pop()
+    .split('}')[0];
+  extracted[0] = type;
+  return extracted;
+};
+
+const createObject = arr => {
+  return (ruleToEvalObj = {
+    type: arr[0],
+    operator: arr[1],
+    value: arr[2]
+  });
+};
+
+const adjustOperatorToQuery = rule => {
+  switch (rule.operator) {
+    case '<': {
+      return { $lt: rule.value };
+    }
+    case '>': {
+      return { $gt: rule.value };
+    }
+    case '===': {
+      return { $eq: rule.value };
     }
   }
-  */
-  console.log(rule);
-  rule.map(ruleFrame => {
-    let ruleToEval = ruleFrame.split(' ');
-    const type = ruleFrame
-      .split('{')
-      .pop()
-      .split('}')[0];
-    ruleToEval[0] = type;
-
-    db.getDB()
-      .collection('ds_collection')
-      .findOne({ sampleType: ruleToEval[0] }, (err, sample) => {
-        if (err) {
-          console.log('couldnt find sample');
-        }
-        ruleToEval[0] = sample.value;
-        console.log(
-          Function(
-            '"use strict";return (' +
-              ruleToEval.toString().replace(/,/g, ' ') +
-              ')'
-          )()
-        );
-        Function(
-          '"use strict";return (' +
-            ruleToEval.toString().replace(/,/g, ' ') +
-            ')'
-        );
-      });
-  });
 };
