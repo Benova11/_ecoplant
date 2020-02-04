@@ -1,4 +1,5 @@
 const db = require('../data/db');
+const collection = 'ds_collection';
 
 exports.createSample = (req, res, next) => {
   const dataSmple = {
@@ -7,7 +8,7 @@ exports.createSample = (req, res, next) => {
     value: req.body.value
   };
   db.getDB()
-    .collection('ds_collection')
+    .collection(collection)
     .insertOne(dataSmple, (err, result) => {
       if (err) {
         console.log('couldnt create');
@@ -19,18 +20,18 @@ exports.createSample = (req, res, next) => {
 
 exports.getSample = (req, res, next) => {
   db.getDB()
-    .collection('ds_collection')
-    .find(
+    .collection(collection)
+    .findOne(
       { _id: db.getPrimaryKey(req.params.id) },
-      { projection: { _id: 0, timeStamp: 1, sampleType: 1, value: 1 } }
-    )
-    .toArray((err, sample) => {
-      if (err) {
-        console.log('couldnt get data sample');
-      } else {
-        res.send(sample);
+      { projection: { _id: 0, timeStamp: 1, sampleType: 1, value: 1 } },
+      (err, sample) => {
+        if (err) {
+          console.log('couldnt get data sample');
+        } else {
+          res.json(sample);
+        }
       }
-    });
+    );
 };
 
 exports.updateSample = (req, res, next) => {
@@ -39,27 +40,27 @@ exports.updateSample = (req, res, next) => {
     sampleType: req.body.type,
     value: req.body.value
   };
-  db.collection('ds_collection').updateOne(
+  db.collection(collection).updateOne(
     { _id: db.getPrimaryKey(req.params.id) },
     dataSmple,
     (err, result) => {
       if (err) {
         console.log('couldnt update ds');
       } else {
-        res.send(result + 'UPDATED');
+        res.json(result + 'UPDATED');
       }
     }
   );
 };
 
 exports.deleteSample = (req, res, next) => {
-  db.collection('ds_collection').deleteOne(
+  db.collection(collection).deleteOne(
     { _id: db.getPrimaryKey(req.params.id) },
     (err, result) => {
       if (err) {
         console.log('couldnt remove ds');
       } else {
-        res.send(result + 'DELETED');
+        res.json(result + 'DELETED');
       }
     }
   );
