@@ -87,8 +87,6 @@ const evaluate = (rule, isBinary) => {
   let queryObj = {};
   let queryOperator;
   if (rulesArr.constructor === Array) {
-    console.log(adjustOperatorToQuery(rulesArr[0]));
-    console.log(adjustOperatorToQuery(rulesArr[1]));
     let triQuery = [
       {
         sampleType: rulesArr[0].type,
@@ -166,13 +164,13 @@ const createObject = arr => {
 const adjustOperatorToQuery = rule => {
   switch (rule.operator) {
     case '<': {
-      return { $lt: rule.value };
+      return { $lt: +rule.value };
     }
     case '>': {
-      return { $gt: rule.value };
+      return { $gt: +rule.value };
     }
     case '===': {
-      return { $eq: rule.value };
+      return { $eq: +rule.value };
     }
   }
 };

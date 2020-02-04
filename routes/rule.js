@@ -14,3 +14,5 @@ router.delete('/:id', ruleController.deleteRule);
 router.get('/eval/:id', ruleController.checkRule);
 
 module.exports = router;
+
+//db.getCollection('ds_collection').find({'$and':[{sampleType:'volume',value:{'$lt':'100'} },{sampleType:'volume',value:{'$gt':'20'} }]})
