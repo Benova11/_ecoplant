@@ -11,6 +11,6 @@ router.put('/:id', ruleController.updateRule);
 
 router.delete('/:id', ruleController.deleteRule);
 
-router.get('/:id/eval', ruleController.checkRule);
+router.get('/eval/:id', ruleController.checkRule);
 
 module.exports = router;

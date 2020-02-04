@@ -57,46 +57,46 @@ exports.deleteRule = (req, res, next) => {
       }
     });
 };
-
+//should delete last masuure
 exports.checkRule = (req, res, next) => {
-  const id = db.getPrimaryKey(req.params.id);
   db.getDB()
     .collection('rule_collection')
-    .find({ _id: id }, { projection: { _id: 0, formula: 1 } })
-    .toArray((err, rule) => {
-      if (err) {
-        console.log('couldnt find rule');
-      } else {
-        const triCondition = rule[0].formula.includes('and') ? 'and' : null;
-        const isBinary = rule[0].formula.includes('or') ? 'or' : triCondition;
-        adjustedRule = isBinary ? rule[0].formula.replace(isBinary, '#') : rule;
-
-        return evaluate(adjustedRule, id);
+    .findOne(
+      { _id: db.getPrimaryKey(req.params.id) },
+      { projection: { _id: 0, formula: 1 } },
+      function(err, rule) {
+        if (err) {
+          console.log('couldnt find rule');
+        }
+        const triCondition = rule.formula.includes('and') ? 'and' : null;
+        const isBinary = rule.formula.includes('or') ? 'or' : triCondition;
+        adjustedRule = isBinary ? rule.formula.replace(isBinary, '#') : rule;
+        res.send(evaluate(adjustedRule));
       }
-    });
+    );
 };
 
-const evaluate = (rule, id) => {
-  let result = false;
-  rule.split('#').map(ruleFrame => {
+const evaluate = rule => {
+  let evalArr = rule.split(' # ').map(ruleFrame => {
     let ruleToEval = ruleFrame.split(' ');
     const type = ruleFrame
       .split('{')
       .pop()
       .split('}')[0];
     ruleToEval[0] = type;
+
     db.getDB()
       .collection('ds_collection')
       .find({ sampleType: ruleToEval[0] })
       .toArray((err, sample) => {
         if (err) {
           console.log('couldnt find sample');
-        } else {
-          console.log(sample.value);
-          ruleToEval[0] = sample.value;
         }
+        console.log(ruleToEval);
+        ruleToEval[0] = sample[0].value;
+        console.log(ruleToEval.toString().replace(/,/g, ' '));
+        eval(ruleToEval.toString().replace(/,/g, ' '));
       });
-    result = eval(ruleToEval.toString().replace(/,/g, ' '));
   });
-  return result;
+  return evalArr;
 };
