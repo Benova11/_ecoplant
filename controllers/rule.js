@@ -169,8 +169,7 @@ const getObjArr = rule => {
   let objArr;
   if (rule.constructor === Array) {
     objArr = rule.map(ruleFrame => {
-      let ruleToEval = extractType(ruleFrame);
-      let ruleToEvalObj = createObject(ruleToEval);
+      let ruleToEvalObj = extractType(ruleFrame);
       return ruleToEvalObj;
     });
   } else {
@@ -186,16 +185,8 @@ const extractType = rule => {
     .split('{')
     .pop()
     .split('}')[0];
-  extracted[0] = type;
-  return extracted;
-};
-
-const createObject = arr => {
-  return (ruleToEvalObj = {
-    type: arr[0],
-    operator: arr[1],
-    value: arr[2]
-  });
+  let obj = { type: type, operator: extracted[1], value: extracted[2] };
+  return obj;
 };
 
 const adjustOperatorToQuery = rule => {
