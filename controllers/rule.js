@@ -85,7 +85,6 @@ exports.checkRule = (req, res, next) => {
 const evaluate = (rule, isBinary) => {
   const rulesArr = getObjArr(rule);
   let queryObj = {};
-  let queryOperator;
   if (rulesArr.constructor === Array) {
     let triQuery = [
       {
@@ -112,8 +111,10 @@ const evaluate = (rule, isBinary) => {
       }
     }
   } else {
-    queryOperator = adjustOperatorToQuery(rulesArr);
-    queryObj = { sampleType: rulesArr.type, value: queryOperator };
+    queryObj = {
+      sampleType: rulesArr.type,
+      value: adjustOperatorToQuery(rulesArr)
+    };
     console.log(queryObj);
   }
 
