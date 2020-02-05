@@ -9,31 +9,37 @@ exports.createSample = (req, res, next) => {
     sampleType: req.body.type,
     value: req.body.value
   };
-  db.getDB()
-    .collection(collection)
-    .insertOne(dataSmple, (err, result) => {
-      if (err) {
-        console.log('couldnt create');
-      } else {
+  try {
+    db.getDB()
+      .collection(collection)
+      .insertOne(dataSmple, (err, result) => {
+        if (err) {
+          throw new Error('something went wrong...');
+        }
         res.json(result + 'CREATED');
-      }
-    });
+      });
+  } catch (err) {
+    console.err(err);
+  }
 };
 
 exports.getSample = (req, res, next) => {
-  db.getDB()
-    .collection(collection)
-    .findOne(
-      { _id: db.getPrimaryKey(req.params.id) },
-      { projection: { _id: 0, timeStamp: 1, sampleType: 1, value: 1 } },
-      (err, sample) => {
-        if (err) {
-          console.log('couldnt get data sample');
-        } else {
+  try {
+    db.getDB()
+      .collection(collection)
+      .findOne(
+        { _id: db.getPrimaryKey(req.params.id) },
+        { projection: { _id: 0, timeStamp: 1, sampleType: 1, value: 1 } },
+        (err, sample) => {
+          if (err) {
+            throw new Error('something went wrong...');
+          }
           res.json(sample);
         }
-      }
-    );
+      );
+  } catch (err) {
+    console.err(err);
+  }
 };
 
 exports.updateSample = (req, res, next) => {
@@ -44,28 +50,34 @@ exports.updateSample = (req, res, next) => {
     sampleType: req.body.type,
     value: req.body.value
   };
-  db.collection(collection).updateOne(
-    { _id: db.getPrimaryKey(req.params.id) },
-    dataSmple,
-    (err, result) => {
-      if (err) {
-        console.log('couldnt update ds');
-      } else {
+  try {
+    db.collection(collection).updateOne(
+      { _id: db.getPrimaryKey(req.params.id) },
+      dataSmple,
+      (err, result) => {
+        if (err) {
+          throw new Error('something went wrong...');
+        }
         res.json(result + 'UPDATED');
       }
-    }
-  );
+    );
+  } catch (err) {
+    console.err(err);
+  }
 };
 
 exports.deleteSample = (req, res, next) => {
-  db.collection(collection).deleteOne(
-    { _id: db.getPrimaryKey(req.params.id) },
-    (err, result) => {
-      if (err) {
-        console.log('couldnt remove ds');
-      } else {
+  try {
+    db.collection(collection).deleteOne(
+      { _id: db.getPrimaryKey(req.params.id) },
+      (err, result) => {
+        if (err) {
+          throw new Error('something went wrong...');
+        }
         res.json(result + 'DELETED');
       }
-    }
-  );
+    );
+  } catch (err) {
+    console.err(err);
+  }
 };

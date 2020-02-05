@@ -6,80 +6,100 @@ exports.createRule = (req, res, next) => {
   if (!rule.contains('{') || !rule.contains('}') || !rule) {
     throw Error;
   }
-  db.getDB()
-    .collection(collection)
-    .insertOne(rule, (err, result) => {
-      if (err) {
-        console.log('couldnt create rule');
-      } else {
-        res.json(result + 'CREATED');
-      }
-    });
+  try {
+    db.getDB()
+      .collection(collection)
+      .insertOne(rule, (err, result) => {
+        if (err) {
+          throw new Error('something went wrong....');
+        } else {
+          res.json(result + 'CREATED');
+        }
+      });
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 exports.getRule = (req, res, next) => {
-  db.getDB()
-    .collection(collection)
-    .findOne(
-      { _id: db.getPrimaryKey(req.params.id) },
-      { projection: { _id: 0, formula: 1 } },
-      (err, rule) => {
-        if (err) {
-          console.log('cant find rule');
-        } else {
-          res.json(rule);
+  try {
+    db.getDB()
+      .collection(collection)
+      .findOne(
+        { _id: db.getPrimaryKey(req.params.id) },
+        { projection: { _id: 0, formula: 1 } },
+        (err, rule) => {
+          if (err) {
+            throw new Error('something went wrong....');
+          } else {
+            res.json(rule);
+          }
         }
-      }
-    );
+      );
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 exports.updateRule = (req, res, next) => {
   const rule = { formula: req.body.rule };
-  db.getDB()
-    .collection(collection)
-    .updateOne(
-      { _id: db.getPrimaryKey(req.params.id) },
-      rule,
-      (err, result) => {
-        if (err) {
-          console.log('couldnt update rule');
-        } else {
-          res.json(result + 'UPDATED');
+  try {
+    db.getDB()
+      .collection(collection)
+      .updateOne(
+        { _id: db.getPrimaryKey(req.params.id) },
+        rule,
+        (err, result) => {
+          if (err) {
+            throw new Error('something went wrong....');
+          } else {
+            res.json(result + 'UPDATED');
+          }
         }
-      }
-    );
+      );
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 exports.deleteRule = (req, res, next) => {
-  db.getDB()
-    .collection(collection)
-    .deleteOne({ _id: db.getPrimaryKey(req.params.id) }, (err, result) => {
-      if (err) {
-        console.log('couldnt remove rule');
-      } else {
-        res.json(result + 'DELETED');
-      }
-    });
+  try {
+    db.getDB()
+      .collection(collection)
+      .deleteOne({ _id: db.getPrimaryKey(req.params.id) }, (err, result) => {
+        if (err) {
+          throw new Error('something went wrong....');
+        } else {
+          res.json(result + 'DELETED');
+        }
+      });
+  } catch (err) {
+    console.error(err);
+  }
 };
 //should delete last masuure
 exports.checkRule = (req, res, next) => {
-  db.getDB()
-    .collection(collection)
-    .findOne(
-      { _id: db.getPrimaryKey(req.params.id) },
-      { projection: { _id: 0, formula: 1 } },
-      function(err, rule) {
-        if (err) {
-          console.log('couldnt find rule');
+  try {
+    db.getDB()
+      .collection(collection)
+      .findOne(
+        { _id: db.getPrimaryKey(req.params.id) },
+        { projection: { _id: 0, formula: 1 } },
+        function(err, rule) {
+          if (err) {
+            throw new Error('something went wrong...');
+          }
+          const triCondition = rule.formula.includes('and') ? 'and' : null;
+          const isBinary = rule.formula.includes('or') ? 'or' : triCondition;
+          adjustedRule = isBinary
+            ? rule.formula.split(' ' + isBinary + ' ')
+            : rule.formula;
+          evaluate(adjustedRule, isBinary);
         }
-        const triCondition = rule.formula.includes('and') ? 'and' : null;
-        const isBinary = rule.formula.includes('or') ? 'or' : triCondition;
-        adjustedRule = isBinary
-          ? rule.formula.split(' ' + isBinary + ' ')
-          : rule.formula;
-        evaluate(adjustedRule, isBinary);
-      }
-    );
+      );
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 const evaluate = (rule, isBinary) => {
@@ -117,16 +137,19 @@ const evaluate = (rule, isBinary) => {
     };
     console.log(queryObj);
   }
-
-  db.getDB()
-    .collection('ds_collection')
-    .find(queryObj)
-    .toArray((err, sample) => {
-      if (err) {
-        console.log('couldnt find sample');
-      }
-      console.log(sample[0] !== undefined);
-    });
+  try {
+    db.getDB()
+      .collection('ds_collection')
+      .find(queryObj)
+      .toArray((err, sample) => {
+        if (err) {
+          throw new Error('something went wrong...');
+        }
+        console.log(sample[0] !== undefined);
+      });
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 const getObjArr = rule => {
