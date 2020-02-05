@@ -3,10 +3,10 @@ const collection = 'rule_collection';
 
 exports.createRule = (req, res, next) => {
   const rule = { formula: req.body.rule };
-  if (!rule.contains('{') || !rule.contains('}') || !rule) {
-    throw Error;
-  }
   try {
+    if (!rule.contains('{') || !rule.contains('}') || !rule) {
+      throw new Error('input isnt correct');
+    }
     db.getDB()
       .collection(collection)
       .insertOne(rule, (err, result) => {
@@ -23,6 +23,9 @@ exports.createRule = (req, res, next) => {
 
 exports.getRule = (req, res, next) => {
   try {
+    if (!req.params.id) {
+      throw new Error('please specify rule id');
+    }
     db.getDB()
       .collection(collection)
       .findOne(
@@ -44,6 +47,9 @@ exports.getRule = (req, res, next) => {
 exports.updateRule = (req, res, next) => {
   const rule = { formula: req.body.rule };
   try {
+    if (!rule) {
+      throw new Error('please specify rule');
+    }
     db.getDB()
       .collection(collection)
       .updateOne(
@@ -64,6 +70,9 @@ exports.updateRule = (req, res, next) => {
 
 exports.deleteRule = (req, res, next) => {
   try {
+    if (!req.params.id) {
+      throw new Error('please specify rule id');
+    }
     db.getDB()
       .collection(collection)
       .deleteOne({ _id: db.getPrimaryKey(req.params.id) }, (err, result) => {
@@ -80,6 +89,9 @@ exports.deleteRule = (req, res, next) => {
 //should delete last masuure
 exports.checkRule = (req, res, next) => {
   try {
+    if (!req.params.id) {
+      throw new Error('please specify rule id');
+    }
     db.getDB()
       .collection(collection)
       .findOne(
@@ -89,6 +101,7 @@ exports.checkRule = (req, res, next) => {
           if (err) {
             throw new Error('something went wrong...');
           }
+          //check if formula constructed with one or 2 conditions
           const triCondition = rule.formula.includes('and') ? 'and' : null;
           const isBinary = rule.formula.includes('or') ? 'or' : triCondition;
           adjustedRule = isBinary
@@ -151,7 +164,7 @@ const evaluate = (rule, isBinary) => {
     console.error(err);
   }
 };
-
+//adjust rule structure for next actions
 const getObjArr = rule => {
   let objArr;
   if (rule.constructor === Array) {

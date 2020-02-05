@@ -23,7 +23,9 @@ app.use((req, res, next) => {
 
 app.use('/data-sample', dataSampleRoutes);
 app.use('/rule', ruleRoutes);
-app.use('/', express.static(path.join(__dirname, 'index.html')));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 db.connect(err => {
   if (err) {
