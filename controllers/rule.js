@@ -86,7 +86,7 @@ exports.deleteRule = (req, res, next) => {
     console.error(err);
   }
 };
-//should delete last masuure
+
 exports.checkRule = (req, res, next) => {
   try {
     if (!req.params.id) {
@@ -107,7 +107,7 @@ exports.checkRule = (req, res, next) => {
           adjustedRule = isBinary
             ? rule.formula.split(' ' + isBinary + ' ')
             : rule.formula;
-          evaluate(adjustedRule, isBinary);
+          evaluate(adjustedRule, isBinary, res);
         }
       );
   } catch (err) {
@@ -115,10 +115,13 @@ exports.checkRule = (req, res, next) => {
   }
 };
 
-const evaluate = (rule, isBinary) => {
+const evaluate = (rule, isBinary, res) => {
   const rulesArr = getObjArr(rule);
   let queryObj = {};
   if (rulesArr.constructor === Array) {
+    if (rulesArr > 2) {
+      throw new Error('something wen wrong;');
+    }
     let triQuery = [
       {
         sampleType: rulesArr[0].type,
@@ -158,7 +161,7 @@ const evaluate = (rule, isBinary) => {
         if (err) {
           throw new Error('something went wrong...');
         }
-        console.log(sample[0] !== undefined);
+        res.send(sample[0] !== undefined);
       });
   } catch (err) {
     console.error(err);
@@ -173,8 +176,7 @@ const getObjArr = rule => {
       return ruleToEvalObj;
     });
   } else {
-    let ruleToEval = extractType(rule);
-    objArr = createObject(ruleToEval);
+    objArr = extractType(rule);
   }
   return objArr;
 };
@@ -199,6 +201,9 @@ const adjustOperatorToQuery = rule => {
     }
     case '===': {
       return { $eq: +rule.value };
+    }
+    default: {
+      return { $in: +rule.value };
     }
   }
 };

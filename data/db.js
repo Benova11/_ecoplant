@@ -1,5 +1,6 @@
 const MongoClient = require('mongodb').MongoClient;
 const ObjectID = require('mongodb').ObjectID;
+
 const db_name = 'ecoPlantDB';
 const url = 'mongodb://localhost:127.0.0.1:27017';
 const mongoOptions = { useNewUrlParser: true };

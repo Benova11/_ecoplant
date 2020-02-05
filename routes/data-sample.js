@@ -5,6 +5,8 @@ const router = express.Router();
 
 router.get('/:id', dataSampleController.getSample);
 
+router.get('/:type/:operation', dataSampleController.getEtlQuery);
+
 router.post('', dataSampleController.createSample);
 
 router.put('/:id', dataSampleController.updateSample);
