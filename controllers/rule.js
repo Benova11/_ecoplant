@@ -191,8 +191,6 @@ extractType = rule => {
 };
 
 adjustOperatorToQuery = rule => {
-  console.log(rule);
-
   switch (rule.operator) {
     case '<': {
       return { $lt: +rule.value };

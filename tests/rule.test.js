@@ -37,7 +37,7 @@ test('extract type of sample to check and adjust object', () => {
   });
 });
 
-test('take rule as string and returns it as object', () => {
+test('take rule as object and adjust query conditional operator', () => {
   expect(
     adjustOperatorToQueryFuc({ type: 'volume', operator: '<', value: '100' })
   ).toEqual({
