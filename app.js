@@ -23,13 +23,14 @@ app.use((req, res, next) => {
 
 app.use('/data-sample', dataSampleRoutes);
 app.use('/rule', ruleRoutes);
+app.use('/', express.static(path.join(__dirname, 'index.html')));
 
 db.connect(err => {
   if (err) {
     console.log('unable to connect to database');
   } else {
-    app.listen(3000, () => {
-      console.log('connect to database, app listening on port 3000');
-    });
+    console.log('connect to database');
   }
 });
+
+module.exports = app;

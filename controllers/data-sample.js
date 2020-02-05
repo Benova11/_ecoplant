@@ -3,7 +3,9 @@ const collection = 'ds_collection';
 
 exports.createSample = (req, res, next) => {
   const dataSmple = {
-    timeStamp: Date.now(),
+    timeStamp: new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Jerusalem'
+    }),
     sampleType: req.body.type,
     value: req.body.value
   };
@@ -36,7 +38,9 @@ exports.getSample = (req, res, next) => {
 
 exports.updateSample = (req, res, next) => {
   const dataSmple = {
-    timeStamp: Date.now(),
+    timeStamp: new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Jerusalem'
+    }),
     sampleType: req.body.type,
     value: req.body.value
   };
