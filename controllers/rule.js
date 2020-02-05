@@ -115,21 +115,21 @@ exports.checkRule = (req, res, next) => {
   }
 };
 
-const evaluate = (rule, isBinary, res) => {
-  const rulesArr = getObjArr(rule);
+evaluate = (rule, isBinary, res) => {
+  const rulesObj = getRuleAsObj(rule);
   let queryObj = {};
-  if (rulesArr.constructor === Array) {
-    if (rulesArr > 2) {
+  if (rulesObj.constructor === Array) {
+    if (rulesObj > 2) {
       throw new Error('something wen wrong;');
     }
     let triQuery = [
       {
-        sampleType: rulesArr[0].type,
-        value: adjustOperatorToQuery(rulesArr[0])
+        sampleType: rulesObj[0].type,
+        value: adjustOperatorToQuery(rulesObj[0])
       },
       {
-        sampleType: rulesArr[1].type,
-        value: adjustOperatorToQuery(rulesArr[1])
+        sampleType: rulesObj[1].type,
+        value: adjustOperatorToQuery(rulesObj[1])
       }
     ];
     switch (isBinary) {
@@ -148,10 +148,9 @@ const evaluate = (rule, isBinary, res) => {
     }
   } else {
     queryObj = {
-      sampleType: rulesArr.type,
-      value: adjustOperatorToQuery(rulesArr)
+      sampleType: rulesObj.type,
+      value: adjustOperatorToQuery(rulesObj)
     };
-    console.log(queryObj);
   }
   try {
     db.getDB()
@@ -168,7 +167,7 @@ const evaluate = (rule, isBinary, res) => {
   }
 };
 //adjust rule structure for next actions
-const getObjArr = rule => {
+getRuleAsObj = rule => {
   let objArr;
   if (rule.constructor === Array) {
     objArr = rule.map(ruleFrame => {
@@ -181,7 +180,7 @@ const getObjArr = rule => {
   return objArr;
 };
 
-const extractType = rule => {
+extractType = rule => {
   let extracted = rule.split(' ');
   const type = rule
     .split('{')
@@ -191,7 +190,9 @@ const extractType = rule => {
   return obj;
 };
 
-const adjustOperatorToQuery = rule => {
+adjustOperatorToQuery = rule => {
+  console.log(rule);
+
   switch (rule.operator) {
     case '<': {
       return { $lt: +rule.value };
