@@ -17,7 +17,6 @@ exports.getEtlQuery = (req, res, next) => {
   try {
     intervals.forEach(interval => {
       schedule.scheduleJob(interval, () => {
-        console.log('interval: ' + interval);
         db.getDB()
           .collection(collection)
           .find({ sampleType: typeToQuery })
@@ -25,20 +24,28 @@ exports.getEtlQuery = (req, res, next) => {
             if (err) {
               throw new Error('something went wrong...');
             }
+            let values = results.map(result => {
+              return result.value;
+            });
+
             switch (operation) {
               case 'max': {
-                console.log(Math.max(...results));
+                console.log(Math.max(...values));
+                break;
               }
               case 'min': {
-                console.log(Math.min(...results));
+                console.log(Math.min(...values));
+                break;
               }
               case 'average': {
-                const sum = results.reduce((a, b) => a + b, 0);
-                const avg = sum / results.length || 0;
+                const sum = values.reduce((a, b) => a + b, 0);
+                const avg = sum / values.length || 0;
                 console.log(avg);
+                break;
               }
               case 'count': {
-                console.log(results.length);
+                console.log(values.length);
+                break;
               }
             }
           });
@@ -67,7 +74,7 @@ exports.createSample = (req, res, next) => {
         res.json(result + 'CREATED');
       });
   } catch (err) {
-    console.err(err);
+    console.error(err);
   }
 };
 
@@ -110,7 +117,7 @@ exports.updateSample = (req, res, next) => {
       }
     );
   } catch (err) {
-    console.err(err);
+    console.error(err);
   }
 };
 
@@ -126,7 +133,7 @@ exports.deleteSample = (req, res, next) => {
       }
     );
   } catch (err) {
-    console.err(err);
+    console.error(err);
   }
 };
 //wasnt sure if could use mongo aggregtion (based on the last comment of the asiggnment)
